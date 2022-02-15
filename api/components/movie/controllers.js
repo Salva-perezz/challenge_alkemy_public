@@ -1,21 +1,27 @@
 const { Movie } = require("../../../store/models");
 const response = require('../../../network/response');
+const { isObjectEmpty, filterFunction, checkQuery } = require('../../../utils');
 
 const getAllMovies = async (req, res) => {
     try {
-        const movies = await Movie.findAll();
-
-        response.succes(req, res, movies, 200);
+        let movies = await Movie.findAll();
+        
+        if(!isObjectEmpty(req.query)) {
+            if(checkQuery(req.query)) {
+                movies = filterFunction(req.query, movies);
+            } else {
+                response.error(req, res, 'Invalid query', 400);
+                return;
+            };
+        };
+        
+        if(!movies.length) {
+            response.error(req, res, 'Not found', 404);
+        } else {
+            response.succes(req, res, movies, 200);
+        }
     } catch(err) {
         response.error(req, res, err.message, 500);
-    };
-};
-
-const getOneMovie = (req, res) => {
-    try {
-        const { id } = req.params;
-    } catch(err) {
-        response.error(req, res, 'Internal server error', 500);
     };
 };
 
