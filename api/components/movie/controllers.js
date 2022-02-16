@@ -1,10 +1,11 @@
 const { Movie } = require("../../../store/models");
 const response = require('../../../network/response');
 const { isObjectEmpty, filterFunction, checkQuery } = require('../../../utils');
+const { insert, destroy, get } = require('../../../store/dbControllers');
 
-const getAllMovies = async (req, res) => {
+const getMovies = async (req, res) => {
     try {
-        let movies = await Movie.findAll();
+        let movies = await get(Movie);
         
         if(!isObjectEmpty(req.query)) {
             if(checkQuery(req.query)) {
@@ -26,30 +27,26 @@ const getAllMovies = async (req, res) => {
 };
 
 const insertMovie = async (req, res) => {
-    try {
         const { title, image, creation_date, calification } = req.body;
 
-        await Movie.create({ title, image, creation_date, calification });
+        const succesStatus = await insert({ title, image, creation_date, calification }, Movie);
 
-        response.succes(req, res, 'Movie created', 201)
-    } catch(err) {
-        response.error(req, res, err.message, 500);
-    };
+        if(succesStatus) {
+            response.succes(req, res, 'Movie created', 201)
+        } else {
+            response.error(req, res, 'Internal server error', 500)
+        }
 }
 
 const deleteMovie = async (req, res) => {
-    try {
         const { id } = req.params;
 
-        await Movie.destroy({ where: {
-            id
-        }});
-
-        response.succes(req, res, 'Movie deleted succesfully', 204);
-    } catch(err) {
-        console.log(err)
-        response.error(req, res, 'Internal server error', 500);
-    };
+        const succesStatus = await destroy(id, Movie);
+        if(succesStatus) {
+            response.succes(req, res, 'Movie deleted succesfully', 204);
+        } else {
+            response.error(req, res, 'Internal server error', 500)
+        };
 };
 
 const updateMovie = async (req, res) => {
@@ -74,4 +71,4 @@ const updateMovie = async (req, res) => {
     }
 }
 
-module.exports = { getAllMovies, insertMovie, deleteMovie, updateMovie };
+module.exports = { getMovies, insertMovie, deleteMovie, updateMovie };

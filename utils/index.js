@@ -1,10 +1,26 @@
+const sortArrayByDate = (array) => {
+    const sortedArray = array.sort((a,b) => a.creation_date.localeCompare(b.creation_date));
+
+    return sortedArray;
+};
+
 const isObjectEmpty = (object) => {
     return Object.keys(object).length === 0;
-}
+};
+
 
 const filterFunction = (objectWithQuery, arrayToFilter) => {
     const query = Object.keys(objectWithQuery)[0];
     const queryValue = objectWithQuery[query].toLowerCase();
+
+    if(query === 'order') {
+        const sortedArray = sortArrayByDate(arrayToFilter);
+
+        if(queryValue === 'desc') sortedArray.reverse();
+
+        return sortedArray;
+    };
+
 
     const filteredArray = arrayToFilter.filter(element => {
         const fieldToCheck = element[query].toLowerCase();
@@ -43,5 +59,6 @@ const checkQuery = (query) => {
 
     return response;
 };
+
 
 module.exports = { isObjectEmpty, filterFunction, checkQuery };
